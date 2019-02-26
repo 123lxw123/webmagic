@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>webmagic-parent</artifactId>
-        <groupId>us.codecraft</groupId>
+        <artifactId>z-webmagic-parent</artifactId>
+        <groupId>com.kezaihui</groupId>
         <version>0.7.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>us.codecraft</groupId>
-    <artifactId>webmagic-scripts</artifactId>
+    <groupId>com.kezaihui</groupId>
+    <artifactId>z-webmagic-scripts</artifactId>
     <properties>
         <kotlin.version>1.1.2-2</kotlin.version>
     </properties>
@@ -45,13 +45,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>us.codecraft</groupId>
-            <artifactId>webmagic-core</artifactId>
+            <groupId>com.kezaihui</groupId>
+            <artifactId>z-webmagic-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>us.codecraft</groupId>
-            <artifactId>webmagic-extension</artifactId>
+            <groupId>com.kezaihui</groupId>
+            <artifactId>z-webmagic-extension</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

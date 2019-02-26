@@ -3,7 +3,11 @@ package us.codecraft.webmagic.downloader;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
+import us.codecraft.webmagic.proxy.Proxy;
 import us.codecraft.webmagic.selector.Html;
+import us.codecraft.webmagic.session.Session;
+
+import java.util.List;
 
 /**
  * Base class of downloader with some common methods.
@@ -38,7 +42,7 @@ public abstract class AbstractDownloader implements Downloader {
     protected void onSuccess(Request request) {
     }
 
-    protected void onError(Request request) {
+    protected void onError(Request request, Proxy proxy, List<Session> sessions, Exception e) {
     }
 
 }

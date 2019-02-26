@@ -39,7 +39,7 @@ public class SimpleProxyProvider implements ProxyProvider {
     }
 
     @Override
-    public void returnProxy(Proxy proxy, Page page, Task task) {
+    public void returnProxy(Proxy proxy, Page page, Exception exception, Task task) {
         //Donothing
     }
 

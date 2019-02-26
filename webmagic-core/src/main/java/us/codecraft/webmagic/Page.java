@@ -52,6 +52,8 @@ public class Page {
     private List<Request> targetRequests = new ArrayList<Request>();
 
     private String charset;
+
+    private Exception downloadException;
     
     public Page() {
     }
@@ -59,6 +61,7 @@ public class Page {
     public static Page fail(){
         Page page = new Page();
         page.setDownloadSuccess(false);
+        page.setDownloadException(new RuntimeException("Default HttpClientDownload Exception"));
         return page;
     }
 
@@ -249,6 +252,14 @@ public class Page {
         this.charset = charset;
     }
 
+    public Exception getDownloadException() {
+        return downloadException;
+    }
+
+    public void setDownloadException(Exception downloadException) {
+        this.downloadException = downloadException;
+    }
+
     @Override
     public String toString() {
         return "Page{" +
@@ -264,6 +275,7 @@ public class Page {
                 ", targetRequests=" + targetRequests +
                 ", charset='" + charset + '\'' +
                 ", bytes=" + Arrays.toString(bytes) +
+                ", exception=" + (downloadException == null ? "null" : downloadException.toString()) +
                 '}';
     }
 }

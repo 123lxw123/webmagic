@@ -1,6 +1,7 @@
 package us.codecraft.webmagic.downloader;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -14,12 +15,16 @@ import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.proxy.Proxy;
 import us.codecraft.webmagic.proxy.ProxyProvider;
 import us.codecraft.webmagic.selector.PlainText;
+import us.codecraft.webmagic.session.Session;
+import us.codecraft.webmagic.session.SessionProvider;
 import us.codecraft.webmagic.utils.CharsetUtils;
 import us.codecraft.webmagic.utils.HttpClientUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -43,12 +48,18 @@ public class HttpClientDownloader extends AbstractDownloader {
 
     private boolean responseHeader = true;
 
+    private List<SessionProvider> sessionProviders = new ArrayList<SessionProvider>();
+
     public void setHttpUriRequestConverter(HttpUriRequestConverter httpUriRequestConverter) {
         this.httpUriRequestConverter = httpUriRequestConverter;
     }
 
     public void setProxyProvider(ProxyProvider proxyProvider) {
         this.proxyProvider = proxyProvider;
+    }
+
+    public void addSessionProvider(SessionProvider sessionProvider) {
+        this.sessionProviders.add(sessionProvider);
     }
 
     private CloseableHttpClient getHttpClient(Site site) {
@@ -77,8 +88,25 @@ public class HttpClientDownloader extends AbstractDownloader {
         CloseableHttpResponse httpResponse = null;
         CloseableHttpClient httpClient = getHttpClient(task.getSite());
         Proxy proxy = proxyProvider != null ? proxyProvider.getProxy(task) : null;
+        List<Session> sessions = new ArrayList<Session>();
+        for (SessionProvider sessionProvider : sessionProviders) {
+            Session session = sessionProvider != null ? sessionProvider.getSession(request, task) : null;
+            sessions.add(session);
+            if (session != null) {
+                String value = request.getHeaders().get(session.getKey());
+                if (StringUtils.isEmpty(value)) {
+                    value = session.getValue();
+                } else {
+                    if (!value.equals(session.getValue())) {
+                        value = value + ";" + session.getValue();
+                    }
+                }
+                request.getHeaders().put(session.getKey(), value);
+            }
+        }
         HttpClientRequestContext requestContext = httpUriRequestConverter.convert(request, task.getSite(), proxy);
         Page page = Page.fail();
+        Exception exception = null;
         try {
             httpResponse = httpClient.execute(requestContext.getHttpUriRequest(), requestContext.getHttpClientContext());
             page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), httpResponse, task);
@@ -87,7 +115,9 @@ public class HttpClientDownloader extends AbstractDownloader {
             return page;
         } catch (IOException e) {
             logger.warn("download page {} error", request.getUrl(), e);
-            onError(request);
+            page.setDownloadException(e);
+            onError(request, proxy, sessions, e);
+            exception = e;
             return page;
         } finally {
             if (httpResponse != null) {
@@ -95,7 +125,14 @@ public class HttpClientDownloader extends AbstractDownloader {
                 EntityUtils.consumeQuietly(httpResponse.getEntity());
             }
             if (proxyProvider != null && proxy != null) {
-                proxyProvider.returnProxy(proxy, page, task);
+                proxyProvider.returnProxy(proxy, page, exception, task);
+            }
+            for (int i = 0; i < sessionProviders.size(); i++) {
+                SessionProvider sessionProvider = sessionProviders.get(i);
+                Session session = sessions.get(i);
+                if (sessionProvider != null) {
+                    sessionProvider.returnSession(session, request, page, exception, task);
+                }
             }
         }
     }
