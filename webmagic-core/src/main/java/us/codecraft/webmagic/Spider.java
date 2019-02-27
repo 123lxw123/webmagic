@@ -111,7 +111,7 @@ public class Spider implements Runnable, Task {
     /**
      * 返回不是期望的 statusCode 时是否抛出异常
      */
-    private boolean throwExceptionWhenUnacceptStatCode = true;
+    private boolean throwExceptionWhenUnacceptStatCode = false;
 
     /**
      * create a spider with pageProcessor.
