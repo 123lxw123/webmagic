@@ -109,6 +109,11 @@ public class Spider implements Runnable, Task {
     private int emptySleepTime = 30000;
 
     /**
+     * 返回不是期望的 statusCode 时是否抛出异常
+     */
+    private boolean throwExceptionWhenUnacceptStatCode = true;
+
+    /**
      * create a spider with pageProcessor.
      *
      * @param pageProcessor pageProcessor
@@ -320,7 +325,7 @@ public class Spider implements Runnable, Task {
                             processRequest(request);
                             onSuccess(request);
                         } catch (Exception e) {
-                            onError(request);
+                            onError(request, e);
                             logger.error("process request " + request + " error", e);
                         } finally {
                             pageCount.incrementAndGet();
@@ -338,10 +343,10 @@ public class Spider implements Runnable, Task {
         logger.info("Spider {} closed! {} pages downloaded.", getUUID(), pageCount.get());
     }
 
-    protected void onError(Request request) {
+    protected void onError(Request request, Exception e) {
         if (CollectionUtils.isNotEmpty(spiderListeners)) {
             for (SpiderListener spiderListener : spiderListeners) {
-                spiderListener.onError(request);
+                spiderListener.onError(request, e);
             }
         }
     }
@@ -395,17 +400,25 @@ public class Spider implements Runnable, Task {
         initComponent();
         if (urls.length > 0) {
             for (String url : urls) {
-                processRequest(new Request(url));
+                try {
+                    processRequest(new Request(url));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    private void processRequest(Request request) {
+    private void processRequest(Request request) throws Exception {
         Page page = downloader.download(request, this);
-        if (page.isDownloadSuccess()){
-            onDownloadSuccess(request, page);
+        if (page.isDownloadSuccess()) {
+            if (throwExceptionWhenUnacceptStatCode && !site.getAcceptStatCode().contains(page.getStatusCode())) {
+                onDownloaderFail(request, new RuntimeException("UnacceptStatCode:" + page.getStatusCode() + "\n" + page.toString()));
+            } else {
+                onDownloadSuccess(request, page);
+            }
         } else {
-            onDownloaderFail(request);
+            onDownloaderFail(request, page.getDownloadException());
         }
     }
 
@@ -425,13 +438,14 @@ public class Spider implements Runnable, Task {
         return;
     }
 
-    private void onDownloaderFail(Request request) {
+    private void onDownloaderFail(Request request, Exception e) throws Exception {
         if (site.getCycleRetryTimes() == 0) {
             sleep(site.getSleepTime());
         } else {
             // for cycle retry
             doCycleRetry(request);
         }
+        throw e;
     }
 
     private void doCycleRetry(Request request) {
@@ -758,5 +772,14 @@ public class Spider implements Runnable, Task {
      */
     public void setEmptySleepTime(int emptySleepTime) {
         this.emptySleepTime = emptySleepTime;
+    }
+
+    public boolean isThrowExceptionWhenUnacceptStatCode() {
+        return throwExceptionWhenUnacceptStatCode;
+    }
+
+    public Spider setThrowExceptionWhenUnacceptStatCode(boolean throwExceptionWhenUnacceptStatCode) {
+        this.throwExceptionWhenUnacceptStatCode = throwExceptionWhenUnacceptStatCode;
+        return this;
     }
 }
