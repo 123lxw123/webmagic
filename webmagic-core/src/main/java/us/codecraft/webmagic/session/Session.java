@@ -4,8 +4,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- * @date 2019-02-19
- * <p>
  * 举个栗子
  * key: cookie
  * value: SID=dvzn2fE5K489vKlamSfTmDFNFB9tFQImdZbQ

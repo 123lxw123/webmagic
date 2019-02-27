@@ -4,9 +4,6 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Task;
 
-/**
- * @date 2019-02-19
- */
 public interface SessionProvider {
     /**
      * Return session to Provider when complete a download.
