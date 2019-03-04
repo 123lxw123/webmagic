@@ -6,7 +6,7 @@
         <version>7</version>
     </parent>
     <groupId>com.kezaihui</groupId>
-    <version>0.7.4</version>
+    <version>0.7.5</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <properties>
@@ -233,7 +233,7 @@
                 <version>2.10.4</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <doctitle>WebMagic 0.7.4</doctitle>
+                    <doctitle>WebMagic 0.7.5</doctitle>
                     <locale>en_US</locale>
                 </configuration>
                 <executions>
@@ -320,16 +320,7 @@
                     <!--</plugin>-->
                 </plugins>
             </build>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>sonatype-nexus-snapshots</id>
-                    <url>https://nexus.kezaihui.com/repository/maven-snapshots/</url>
-                </snapshotRepository>
-                <repository>
-                    <id>sonatype-nexus-staging</id>
-                    <url>https://nexus.kezaihui.com/repository/maven-releases/</url>
-                </repository>
-            </distributionManagement>
+
         </profile>
     </profiles>
 
