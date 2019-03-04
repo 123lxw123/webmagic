@@ -87,7 +87,7 @@ public class HttpClientDownloader extends AbstractDownloader {
         }
         CloseableHttpResponse httpResponse = null;
         CloseableHttpClient httpClient = getHttpClient(task.getSite());
-        Proxy proxy = proxyProvider != null ? proxyProvider.getProxy(task) : null;
+        Proxy proxy = proxyProvider != null ? proxyProvider.getProxy(request, task) : null;
         List<Session> sessions = new ArrayList<Session>();
         for (SessionProvider sessionProvider : sessionProviders) {
             Session session = sessionProvider != null ? sessionProvider.getSession(request, task) : null;
