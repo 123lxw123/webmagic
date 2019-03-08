@@ -454,8 +454,8 @@ public class Spider implements Runnable, Task {
             addRequest(SerializationUtils.clone(request).setPriority(0).putExtra(Request.CYCLE_TRIED_TIMES, 1));
         } else {
             int cycleTriedTimes = (Integer) cycleTriedTimesObject;
-            cycleTriedTimes++;
             if (cycleTriedTimes < site.getCycleRetryTimes()) {
+                cycleTriedTimes++;
                 addRequest(SerializationUtils.clone(request).setPriority(0).putExtra(Request.CYCLE_TRIED_TIMES, cycleTriedTimes));
             }
         }
