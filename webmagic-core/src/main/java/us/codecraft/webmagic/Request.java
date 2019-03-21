@@ -27,6 +27,11 @@ public class Request implements Serializable {
     private HttpRequestBody requestBody;
 
     /**
+     * 用来给 DuplicateRemover 判断是否需要去重
+     */
+    private String fingerprint;
+
+    /**
      * Store additional information in extras.
      */
     private Map<String, Object> extras;
@@ -90,6 +95,18 @@ public class Request implements Serializable {
             extras = new HashMap<String, Object>();
         }
         extras.put(key, value);
+        return this;
+    }
+
+    public String getFingerprint() {
+        if (fingerprint == null || fingerprint.isEmpty()) {
+            return getUrl();
+        }
+        return fingerprint;
+    }
+
+    public Request setFingerprint(String fingerprint) {
+        this.fingerprint = fingerprint;
         return this;
     }
 
