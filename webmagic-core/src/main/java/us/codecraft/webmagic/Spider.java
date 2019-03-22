@@ -326,7 +326,7 @@ public class Spider implements Runnable, Task {
                             onSuccess(request);
                         } catch (Exception e) {
                             onError(request, e);
-                            logger.error("process request " + request + " error", e);
+                            logger.error("process request " + request.getFingerprint() + " error", e);
                         } finally {
                             pageCount.incrementAndGet();
                             signalNewUrl();
@@ -413,7 +413,7 @@ public class Spider implements Runnable, Task {
         Page page = downloader.download(request, this);
         if (page.isDownloadSuccess()) {
             if (throwExceptionWhenUnacceptStatCode && !site.getAcceptStatCode().contains(page.getStatusCode())) {
-                onDownloaderFail(request, new RuntimeException("UnacceptStatCode:" + page.getStatusCode() + "\n" + page.toString()));
+                onDownloaderFail(request, new RuntimeException("UnacceptStatCode:" + page.getStatusCode()));
             } else {
                 onDownloadSuccess(request, page);
             }

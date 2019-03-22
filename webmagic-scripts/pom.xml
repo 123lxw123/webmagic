@@ -3,7 +3,7 @@
     <parent>
         <artifactId>z-webmagic-parent</artifactId>
         <groupId>com.kezaihui</groupId>
-        <version>0.7.7</version>
+        <version>0.7.8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
