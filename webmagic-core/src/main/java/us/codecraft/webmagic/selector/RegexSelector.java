@@ -41,7 +41,7 @@ public class RegexSelector implements Selector {
 
     /**
      * Create a RegexSelector. When there is no capture group, the value is set to 0 else set to 1.
-     * @param regexStr
+     * @param regexStr 正则表达式
      */
     public RegexSelector(String regexStr) {
         this.compileRegex(regexStr);

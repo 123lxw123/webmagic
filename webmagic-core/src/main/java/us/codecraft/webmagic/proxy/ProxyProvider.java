@@ -23,6 +23,7 @@ public interface ProxyProvider {
 
     /**
      * Get a proxy for task by some strategy.
+     * @param request the download request
      * @param task the download task
      * @return proxy 
      */
