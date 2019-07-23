@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
+import us.codecraft.webmagic.pagevalidate.PageStatCodeValidator;
+import us.codecraft.webmagic.pagevalidate.PageValidateInterface;
 import us.codecraft.webmagic.pipeline.CollectorPipeline;
 import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.pipeline.Pipeline;
@@ -108,10 +110,7 @@ public class Spider implements Runnable, Task {
 
     private int emptySleepTime = 30000;
 
-    /**
-     * 返回不是期望的 statusCode 时是否抛出异常
-     */
-    private boolean throwExceptionWhenUnacceptStatCode = false;
+    private PageValidateInterface pageValidateInterface = new PageStatCodeValidator(false);
 
     /**
      * create a spider with pageProcessor.
@@ -326,7 +325,7 @@ public class Spider implements Runnable, Task {
                             onSuccess(request);
                         } catch (Exception e) {
                             onError(request, e);
-                            logger.error("process request " + request + " error", e);
+                            logger.error("process request " + request.getFingerprint() + " error", e);
                         } finally {
                             pageCount.incrementAndGet();
                             signalNewUrl();
@@ -412,10 +411,13 @@ public class Spider implements Runnable, Task {
     private void processRequest(Request request) throws Exception {
         Page page = downloader.download(request, this);
         if (page.isDownloadSuccess()) {
-            if (throwExceptionWhenUnacceptStatCode && !site.getAcceptStatCode().contains(page.getStatusCode())) {
-                onDownloaderFail(request, new RuntimeException("UnacceptStatCode:" + page.getStatusCode() + "\n" + page.toString()));
-            } else {
+            try {
+                if (pageValidateInterface != null) {
+                    pageValidateInterface.validate(page, getSite());
+                }
                 onDownloadSuccess(request, page);
+            } catch (RuntimeException e) {
+                onDownloaderFail(request, e);
             }
         } else {
             onDownloaderFail(request, page.getDownloadException());
@@ -774,12 +776,8 @@ public class Spider implements Runnable, Task {
         this.emptySleepTime = emptySleepTime;
     }
 
-    public boolean isThrowExceptionWhenUnacceptStatCode() {
-        return throwExceptionWhenUnacceptStatCode;
-    }
-
-    public Spider setThrowExceptionWhenUnacceptStatCode(boolean throwExceptionWhenUnacceptStatCode) {
-        this.throwExceptionWhenUnacceptStatCode = throwExceptionWhenUnacceptStatCode;
+    public Spider setPageValidateInterface(PageValidateInterface pageValidateInterface) {
+        this.pageValidateInterface = pageValidateInterface;
         return this;
     }
 }

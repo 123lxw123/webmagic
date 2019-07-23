@@ -17,6 +17,7 @@ import us.codecraft.webmagic.proxy.ProxyProvider;
 import us.codecraft.webmagic.selector.PlainText;
 import us.codecraft.webmagic.session.Session;
 import us.codecraft.webmagic.session.SessionProvider;
+import us.codecraft.webmagic.urlparam.UrlParamProvider;
 import us.codecraft.webmagic.utils.CharsetUtils;
 import us.codecraft.webmagic.utils.HttpClientUtils;
 
@@ -50,6 +51,8 @@ public class HttpClientDownloader extends AbstractDownloader {
 
     private List<SessionProvider> sessionProviders = new ArrayList<SessionProvider>();
 
+    private List<UrlParamProvider> urlParamProviders = new ArrayList<UrlParamProvider>();
+
     public void setHttpUriRequestConverter(HttpUriRequestConverter httpUriRequestConverter) {
         this.httpUriRequestConverter = httpUriRequestConverter;
     }
@@ -60,6 +63,10 @@ public class HttpClientDownloader extends AbstractDownloader {
 
     public void addSessionProvider(SessionProvider sessionProvider) {
         this.sessionProviders.add(sessionProvider);
+    }
+
+    public void addUrlParamProvider(UrlParamProvider urlParamProvider) {
+        this.urlParamProviders.add(urlParamProvider);
     }
 
     private CloseableHttpClient getHttpClient(Site site) {
@@ -81,7 +88,7 @@ public class HttpClientDownloader extends AbstractDownloader {
     }
 
     @Override
-    public Page download(Request request, Task task) {
+    public Page download(final Request request, final Task task) {
         if (task == null || task.getSite() == null) {
             throw new NullPointerException("task or site can not be null");
         }
@@ -104,6 +111,10 @@ public class HttpClientDownloader extends AbstractDownloader {
                 request.getHeaders().put(session.getKey(), value);
             }
         }
+
+        for (UrlParamProvider provider: urlParamProviders) {
+            request.setUrl(provider.getUrlWithParam(request, task));
+        }
         HttpClientRequestContext requestContext = httpUriRequestConverter.convert(request, task.getSite(), proxy);
         Page page = Page.fail();
         Exception exception = null;
@@ -111,10 +122,10 @@ public class HttpClientDownloader extends AbstractDownloader {
             httpResponse = httpClient.execute(requestContext.getHttpUriRequest(), requestContext.getHttpClientContext());
             page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), httpResponse, task);
             onSuccess(request);
-            logger.info("downloading page success {}", request.getUrl());
+            logger.info("downloading page success {}", request.getFingerprint());
             return page;
         } catch (IOException e) {
-            logger.warn("download page {} error", request.getUrl(), e);
+            logger.warn("download page {} error", request.getFingerprint(), e);
             page.setDownloadException(e);
             onError(request, proxy, sessions, e);
             exception = e;
