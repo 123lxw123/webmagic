@@ -4,8 +4,8 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 
 /**
+ * 验证状态码
  * @author jike
- * @date 2019-04-09
  */
 public class PageStatCodeValidator implements PageValidateInterface {
 
